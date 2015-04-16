@@ -1,0 +1,4 @@
+Time(ms), Target, Condition, Parameter, Boolean
+1425398532091793140, wheel_LF, loose_wheel, , True
+1425398538259200156, wheel_LF, holding, hand_L, True
+1425398542080428222, wheel_LF, on_hub, hub_LF, True

@@ -1,0 +1,24 @@
+Remove Tire
+===========
+
+This recording shows a user approaching the tire, removing it from 
+the hub, turning th the left, and placing it on the ground. There
+is some "dead zone" in the recording, at both the beginning and 
+end of the recording, with junk data, and some missing frames. 
+
+
+
+*Approach*
+Start -> 1425398469.250865
+
+*Reach*
+1425398469.250865 -> 1425398470.039567
+
+*Unhang*
+1425398470.039567 -> 1425398471.824730
+
+*Putdown*
+1425398471.824730 -> 1425398474.387841
+
+*Disengage*
+1425398474.387841 -> End
