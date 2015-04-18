@@ -1,18 +1,28 @@
-clc; clear all; close all;
-addpath 'data/'
-addpath 'data/mount_tire/'
-addpath 'data/remove_tire/'
+function h = plot_all(t, plots)
 
-format long
-x = csvread('data/remove_tire/world-wheel_LF.csv', 1, 0);
-%x = csvread('data/remove_tire/world-wheel_LF.csv', 700, 0);
-%x = x(1:800, :)
+size(plots, 2);
 
-hold on
-plot(x(:, 1), x(:, 2), 'r');
-plot(x(:, 1), x(:, 3), 'g');
-plot(x(:, 1), x(:, 4), 'b');
+for iter = 0:size(plots, 2)-1
+    z = iter+1;
+    y = cell2mat(plots(:, iter+1));
+    size(y, 2);
+    for plot_col = 1:size(y, 2)
+        plot_no = iter*3 + plot_col;
+        subplot(3, 3, plot_no);
+        color = 'r';
+        switch plot_col
+            case 1
+                color = 'r';
+            case 2 
+                color = 'g';
+            case 3
+                color = 'b';
+        end
+        
+        hold on
+        plot(t(1:size(y, 1)), smooth(t(1:size(y, 1)), y(:, plot_col)), 'k-')
+        plot(t(1:size(y, 1)), y(:, plot_col), color);
+    end
+end
 
-t_1 = 300;
-t_2 = 320;
-highlight(x(t_1, 1), x(t_2, 1))
+end
