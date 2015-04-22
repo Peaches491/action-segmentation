@@ -20,7 +20,7 @@ for iter = 0:size(plots, 2)-1
         end
         
         hold on
-        plot(t(1:size(y, 1)), smooth(t(1:size(y, 1)), y(:, plot_col)), color)
+        plot(t(1:size(y, 1)), y(:, plot_col), color)
         %plot(t(1:size(y, 1)), y(:, plot_col), color);
         
         for vert_set_idx = 1:numel(verticals)
@@ -28,7 +28,16 @@ for iter = 0:size(plots, 2)-1
             for v = 1:numel(vert_set)
                 ax = gca;
                 ax.ColorOrderIndex = vert_set_idx;
-                plot([vert_set(v), vert_set(v)], ylim)
+                
+                n=25;
+                x_vals = ones(1, n)*vert_set(v);
+                y_vals = linspace(min(ylim),max(ylim),n);
+                
+                if vert_set_idx == 1
+                    plot(x_vals, y_vals, '.')
+                else
+                    plot(x_vals, y_vals)
+                end
             end
         end
     end
