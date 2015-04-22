@@ -81,7 +81,9 @@ c = num2cell(clusters, 1)
 y = cellfun(@(x)(pts(logical(x))), c, 'UniformOutput', false)
 
 clf
+dots = repmat('-', 1, numel(y) + 1);
+dots(1) = '.'
 plot_all(t, {x, v, a}, { ... ns2sec(states.Time), ... 
-    ns2sec(manual.EndTime), y{:}})
+    ns2sec(manual.EndTime), y{:}}, dots)
 
 %highlight(x(t_1, 1), x(t_2, 1))

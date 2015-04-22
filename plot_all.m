@@ -1,4 +1,4 @@
-function h = plot_all(t, plots, verticals)
+function h = plot_all(t, plots, verticals, dots)
 
 size(plots, 2);
 
@@ -33,11 +33,7 @@ for iter = 0:size(plots, 2)-1
                 x_vals = ones(1, n)*vert_set(v);
                 y_vals = linspace(min(ylim),max(ylim),n);
                 
-                if vert_set_idx == 1
-                    plot(x_vals, y_vals, '.')
-                else
-                    plot(x_vals, y_vals)
-                end
+                plot(x_vals, y_vals, dots(vert_set_idx))
             end
         end
     end
