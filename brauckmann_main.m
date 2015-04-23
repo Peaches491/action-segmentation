@@ -127,27 +127,50 @@ speed = smooth(sqrt(v(:,1).^2 + v(:,2).^2 + v(:,3).^2), 50);
 
 %%
 
-p1 = 120;
-s = round(max(p1-5, 1));
-e = round(min(p1+5, length(speed)));
-lastSeg = speed(s:e)./norm(speed(s:e));
+% p1 = 55;
+% s = round(max(p1-5, 1));
+% e = round(min(p1+5, length(speed)));
+% lastSeg = speed(s:e)./norm(speed(s:e));
+% 
+% for ws = 6:5:100;
+%  
+%  s = round(max(p1-ws, 1));
+%  e = round(min(p1+ws, length(speed)));
+%  newSeg = speed(s:e)./norm(speed(s:e));
+%  
+%  [h p] = kstest2(lastSeg,newSeg, 'alpha', 1e-10)
+%  
+%  if h == 1
+%      break
+%  end
+%      
+%  lastSeg = newSeg;
+% end
+%  
+%  plot([t(s) t(s)],[0 2], 'r');
+%  plot([t(e) t(e)],[0 2], 'r');
+%  plot([t(p1) t(p1)],[0 2], 'b');
 
-for ws = 6:5:100;
- 
- s = round(max(p1-ws, 1));
- e = round(min(p1+ws, length(speed)));
- newSeg = speed(s:e)./norm(speed(s:e));
- 
- [h p] = kstest2(lastSeg,newSeg, 'alpha', 1e-10)
- 
- if h == 1
-     break
- end
+ %% Near Zero 
+ d = .03
+ w = 3
+ points = [];
+ for i = 1:length(speed)
+    s = round(max(i-w, 1));
+    e = round(min(i+w, length(speed)));
+    s1 = mean(speed(s:i)) < d;
+    s2 = mean(speed(i:e)) < d;
+    [s1 s2 i]
+    if xor(s1, s2)
+    display('here')
+    points = [points i]
+    end
+    
      
- lastSeg = newSeg;
-end
+ end
  
- plot([t(s) t(s)],[0 2], 'r');
- plot([t(e) t(e)],[0 2], 'r');
- plot([t(p1) t(p1)],[0 2], 'b');
-
+ for i = 1:length(points)
+    plot([t(points(i)) t(points(i))],[0 2], 'r');
+ end
+ 
+ 
