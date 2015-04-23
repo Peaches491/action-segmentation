@@ -1,4 +1,4 @@
-clc; clear all;
+clc; close all; clear all;
 addpath 'data/'
 addpath 'data/mount_tire/'
 addpath 'data/remove_tire/'
@@ -82,50 +82,74 @@ speed = smooth(sqrt(v(:,1).^2 + v(:,2).^2 + v(:,3).^2), 50);
 
 %% Windowed KS-test 
 
-figure;
-plot(t(1:length(speed)),speed);
-hold on
+ figure;
+ plot(t(1:length(speed)),speed);
+ hold on
+% 
+% 
+% points = [];
+% p1 = 220;
+% ws = 20;
+% 
+% s = round(max(p1-ws/2, 1));
+% e = round(min(p1+ws/2, length(speed)));
+% testSeg = speed(s:e); 
+% 
+% for m = e:1:length(speed)
+% 
+% newe = round(min(m, length(speed)));    
+% newSeg = speed(s:newe); 
+% length(newSeg)
+% [h p] = kstest2(newSeg,testSeg, 'alpha', 1e-2)
+% if h == 1
+%     break;
+%     points = [points newe];
+% end
+% end
+% 
+% for n = 1:1:s
+% news = round(max(s-n, 1));
+% newSeg = speed(news:e);
+% [h p] = kstest2(testSeg,newSeg, 'alpha', 1e-2)
+% if h == 1
+%     break;
+%      points = [points news];
+% end
+% 
+% end
+% 
+% plot([t(s) t(s)],[0 2], 'r');
+% plot([t(e) t(e)],[0 2], 'r');
+% plot([t(newe) t(newe)],[0 2], 'b');
+% plot([t(news) t(news)],[0 2], 'b');
+% 
+% for i = 1:length(points)
+%     plot([t(points(i)) t(points(i))],[0 2], 'g');
+% end
 
+%%
 
-points = [];
-p1 = 220;
-ws = 20;
+p1 = 120;
+s = round(max(p1-5, 1));
+e = round(min(p1+5, length(speed)));
+lastSeg = speed(s:e)./norm(speed(s:e));
 
-s = round(max(p1-ws/2, 1));
-e = round(min(p1+ws/2, length(speed)));
-testSeg = speed(s:e); 
-
-for m = e:1:length(speed)
-
-newe = round(min(m, length(speed)));    
-newSeg = speed(s:newe); 
-length(newSeg)
-[h p] = kstest2(newSeg,testSeg, 'alpha', 1e-2)
-if h == 1
-    break;
-    points = [points newe];
+for ws = 6:5:100;
+ 
+ s = round(max(p1-ws, 1));
+ e = round(min(p1+ws, length(speed)));
+ newSeg = speed(s:e)./norm(speed(s:e));
+ 
+ [h p] = kstest2(lastSeg,newSeg, 'alpha', 1e-10)
+ 
+ if h == 1
+     break
+ end
+     
+ lastSeg = newSeg;
 end
-end
-
-for n = 1:1:s
-news = round(max(s-n, 1));
-newSeg = speed(news:e);
-[h p] = kstest2(testSeg,newSeg, 'alpha', 1e-2)
-if h == 1
-    break;
-     points = [points news];
-end
-
-end
-
-plot([t(s) t(s)],[0 2], 'r');
-plot([t(e) t(e)],[0 2], 'r');
-plot([t(newe) t(newe)],[0 2], 'b');
-plot([t(news) t(news)],[0 2], 'b');
-
-for i = 1:length(points)
-    plot([t(points(i)) t(points(i))],[0 2], 'g');
-end
-
-
+ 
+ plot([t(s) t(s)],[0 2], 'r');
+ plot([t(e) t(e)],[0 2], 'r');
+ plot([t(p1) t(p1)],[0 2], 'b');
 
