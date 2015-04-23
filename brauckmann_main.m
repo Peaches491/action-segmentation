@@ -29,7 +29,7 @@ ns2sec = @(ns_val) max((ns_val - data.min_ns)./(1000000000.0), 0);
 
 
 dataset = data.ObjManip(1);
-speed = dataset.vel.mag;
+speed = smooth(dataset.vel.mag, 50);
 %speed = smooth(sqrt(v(:,1).^2 + v(:,2).^2 + v(:,3).^2), 50);
 
 t = dataset.vel.t;
