@@ -5,6 +5,8 @@ addpath 'data/remove_tire/'
 addpath 'emgm/'
 addpath 'vbgm/'
 
+addpath 'imports/'
+
 addpath 'change_detection' 
 addpath 'change_detection/RULSIF'
 format long
@@ -13,7 +15,7 @@ data_dir = 'data/remove_tire/'
 dir(strcat(data_dir, '*.csv'))
 
 manual = import_manual_segments(strcat(data_dir, 'manual_segment.csv'));
-states = importfile(strcat(data_dir, '/states.csv'));
+states = import_state_changes(strcat(data_dir, 'states.csv'));
 data = csvread(strcat(data_dir, 'wheel_LF-hand_L.csv'), 1, 0);
 
 % Convert NS to seconds

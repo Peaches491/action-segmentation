@@ -1,0 +1,6 @@
+FileName, FromClass, ToClass, FromName, ToName
+Wheel_LF-hand_L.csv, Object, Manipulator, Wheel_LF, hand_L
+Wheel_LF-hand_R.csv, Object, Manipulator, Wheel_LF, hand_R
+world-hand_L.csv, Fixture, Manipulator, world, hand_L
+world-hand_R.csv, Fixture, Manipulator, world, hand_R
+world-Wheel_LF.csv, Fixture, Object, world, Wheel_LF
