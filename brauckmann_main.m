@@ -152,25 +152,44 @@ speed = smooth(sqrt(v(:,1).^2 + v(:,2).^2 + v(:,3).^2), 50);
 %  plot([t(p1) t(p1)],[0 2], 'b');
 
  %% Near Zero 
- d = .03
- w = 3
- points = [];
- for i = 1:length(speed)
-    s = round(max(i-w, 1));
-    e = round(min(i+w, length(speed)));
-    s1 = mean(speed(s:i)) < d;
-    s2 = mean(speed(i:e)) < d;
-    [s1 s2 i]
-    if xor(s1, s2)
-    display('here')
-    points = [points i]
-    end
-    
-     
- end
+%  d = .03
+%  w = 3
+%  points = [];
+%  for i = 1:length(speed)
+%     s = round(max(i-w, 1));
+%     e = round(min(i+w, length(speed)));
+%     s1 = mean(speed(s:i)) < d;
+%     s2 = mean(speed(i:e)) < d;
+%     [s1 s2 i]
+%     if xor(s1, s2)
+%     display('here')
+%     points = [points i]
+%     end
+%     
+%      
+%  end
+%  
+%  for i = 1:length(points)
+%     plot([t(points(i)) t(points(i))],[0 2], 'r');
+%  end
  
- for i = 1:length(points)
-    plot([t(points(i)) t(points(i))],[0 2], 'r');
+ %% Segmentation
+ g = zeros(length(speed), length(speed));
+ error = 0; 
+ p1 = 1; p2 = 5;
+ 
+ for p1 = 1:length(speed)
+     for p2 = p1+1:length(speed)
+     error = calcError(speed, t, p1, p2);
+ 
+     g(p1, p2) = .5 + error;
+     end
  end
+ g = sparse(g);
+ [dist,path,pred] = graphshortestpath(g, 1, length(speed))
+ 
+  for i = 1:length(path)
+     plot([t(path(i)) t(path(i))],[0 2], 'r');
+  end
  
  
