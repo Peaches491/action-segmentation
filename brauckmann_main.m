@@ -56,31 +56,74 @@ speed = smooth(sqrt(v(:,1).^2 + v(:,2).^2 + v(:,3).^2), 50);
 %References:
 %Liu, S., Yamada, M., Collier, N., Sugiyama, M. Change-point detection in time-series data by relative density-ratio estimation. arXiv 1203.0453 (2012) 
 %Yamada, M., Suzuki, T., Kanamori, T., Hachiya, H., Sugiyama, M. Relative density-ratio estimation for robust distribution comparison. In: Advances in Neural Information Processing Systems 24. (2011) 594--602
-alpha = .0;
+% alpha = .0;
+% 
+% n = 50;
+% k = 10;
+% 
+% score1 = change_detection(speed',n,k,alpha);
+% score2 = change_detection(speed(:,end:-1:1)',n,k,alpha);
+% 
+% subplot(2,1,1);
+% plot(speed, 'b-', 'linewidth',2);
+% %axis([-inf,size(speed,2),-inf,inf])
+% title('Original Signal')
+% 
+% subplot(2,1,2);
+% score2 = score2(end:-1:1);
+% 
+% % 2*n+k-2 is the size of the "buffer zone".
+% plot([zeros(1,2*n-2+k),score1 + score2], 'r-', 'linewidth',2);
+% %axis([-inf,size(speed,2),-inf,inf])
+% title('Change-Point Score')
 
-n = 50;
-k = 10;
 
-score1 = change_detection(speed',n,k,alpha);
-score2 = change_detection(speed(:,end:-1:1)',n,k,alpha);
+%% Windowed KS-test 
 
-subplot(2,1,1);
-plot(speed, 'b-', 'linewidth',2);
-%axis([-inf,size(speed,2),-inf,inf])
-title('Original Signal')
-
-subplot(2,1,2);
-score2 = score2(end:-1:1);
-
-% 2*n+k-2 is the size of the "buffer zone".
-plot([zeros(1,2*n-2+k),score1 + score2], 'r-', 'linewidth',2);
-%axis([-inf,size(speed,2),-inf,inf])
-title('Change-Point Score')
+figure;
+plot(t(1:length(speed)),speed);
+hold on
 
 
-%%
-figure
-%plot(t(1:length(speed)),speed)
+points = [];
+p1 = 220;
+ws = 20;
+
+s = round(max(p1-ws/2, 1));
+e = round(min(p1+ws/2, length(speed)));
+testSeg = speed(s:e); 
+
+for m = e:1:length(speed)
+
+newe = round(min(m, length(speed)));    
+newSeg = speed(s:newe); 
+length(newSeg)
+[h p] = kstest2(newSeg,testSeg, 'alpha', 1e-2)
+if h == 1
+    break;
+    points = [points newe];
+end
+end
+
+for n = 1:1:s
+news = round(max(s-n, 1));
+newSeg = speed(news:e);
+[h p] = kstest2(testSeg,newSeg, 'alpha', 1e-2)
+if h == 1
+    break;
+     points = [points news];
+end
+
+end
+
+plot([t(s) t(s)],[0 2], 'r');
+plot([t(e) t(e)],[0 2], 'r');
+plot([t(newe) t(newe)],[0 2], 'b');
+plot([t(news) t(news)],[0 2], 'b');
+
+for i = 1:length(points)
+    plot([t(points(i)) t(points(i))],[0 2], 'g');
+end
 
 
 
