@@ -1,56 +1,39 @@
-clc; close all; clear all;
+clc; clear all;
 addpath 'data/'
 addpath 'data/mount_tire/'
 addpath 'data/remove_tire/'
 addpath 'emgm/'
 addpath 'vbgm/'
 
+addpath 'imports/'
+
 addpath 'change_detection' 
 addpath 'change_detection/RULSIF'
+
 format long
 
-data_dir = 'data/remove_tire/'
-dir(strcat(data_dir, '*.csv'))
+data_dir = 'data/remove_tire/';
 
-manual = import_manual_segments(strcat(data_dir, 'manual_segment.csv'));
-states = importfile(strcat(data_dir, '/states.csv'));
-data = csvread(strcat(data_dir, 'wheel_LF-hand_L.csv'), 1, 0);
-
-% Convert NS to seconds
-ns2sec = @(ns_val) max((ns_val - data(1))./(1000000000.0), 0);
-t = ns2sec(data(:, 1)); 
+types = import_file_types(strcat(data_dir, '/file_types.csv'));
 
 % Define start and end points
-start_pct = 0.05;
-end_pct = 0.90;
+start_pct = 0.0;
+end_pct = 0.95;
 
-st_idx = int32(size(t,1)*start_pct) + 1;
-end_idx = int32(size(t,1)*end_pct);
-t = t(st_idx:end_idx);
-x = data(st_idx:end_idx, 2:end);
+data = build_data_struct(data_dir, types, start_pct, end_pct);
+data
 
 
-% Replace all zero timestamps withj beginning of file
-manual.StartTime(manual.StartTime==0) = data(st_idx, 1);
-states.Time(states.Time==0) = data(st_idx, 1);
-% Replace all negative timestamps with the end of the file
-manual.EndTime(manual.EndTime<0) = data(end_idx, 1);
-states.Time(states.Time<0) = data(end_idx, 1);
-
-dx = x(2:end, :) - x(1:end-1, :);
-dt = t(2:end) - t(1:end-1);
-v = bsxfun (@rdivide, dx, dt);
-
-ddx = dx(2:end, :) - dx(1:end-1, :);
-a = bsxfun (@rdivide, ddx, dt(1:end-1));
+% Convert NS to seconds
+ns2sec = @(ns_val) max((ns_val - data.min_ns)./(1000000000.0), 0);
 
 
-smooth_cols = @(x, varargs) cell2mat(cellfun(@(x)(smooth(t(1:numel(x)), x, varargs(1), 'moving')), num2cell(x, 1), 'UniformOutput', false));
-args = [5];
-x = smooth_cols(x, args);
-v = smooth_cols(v, args);
+dataset = data.ObjManip(1);
+speed = dataset.vel.mag;
+%speed = smooth(sqrt(v(:,1).^2 + v(:,2).^2 + v(:,3).^2), 50);
 
-speed = smooth(sqrt(v(:,1).^2 + v(:,2).^2 + v(:,3).^2), 50);
+t = dataset.vel.t;
+
 
 %% Change-Point Detection in Time-Series Data by Relative Density Ratio Estimation
 %References:
