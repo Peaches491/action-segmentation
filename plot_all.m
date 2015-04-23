@@ -1,13 +1,16 @@
 function h = plot_all(t, plots, verticals, dots)
 
-size(plots, 2);
+size(plots, 2)
 
 for iter = 0:size(plots, 2)-1
-    z = iter+1;
+    
     y = cell2mat(plots(:, iter+1));
-    size(y, 2);
+    
     for plot_col = 1:size(y, 2)
-        plot_no = iter*3 + plot_col;
+        
+        [size(plots, 2), size(y, 2)];
+        plot_no = iter*size(y, 2) + plot_col;
+        
         subplot(size(plots, 2), size(y, 2), plot_no);
         color = 'r';
         switch plot_col
