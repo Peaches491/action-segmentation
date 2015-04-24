@@ -1,17 +1,23 @@
-function h = plot_all(t, plots, verticals, dots)
+function h = plot_all(plots, verticals, dots, titles)
 
-size(plots, 2)
+title_idx = 1;
+largest_range = [realmax, realmax]*-1;
+axes_flip = [-1, 1];
+handles = [];
 
 for iter = 0:size(plots, 2)-1
     
     y = cell2mat(plots(:, iter+1));
+    t = y(:, 1);
+    y = y(:, 2:end);
     
     for plot_col = 1:size(y, 2)
         
         [size(plots, 2), size(y, 2)];
         plot_no = iter*size(y, 2) + plot_col;
         
-        subplot(size(plots, 2), size(y, 2), plot_no);
+        h = subplot(size(plots, 2), size(y, 2), plot_no);
+        handles = [handles, h];
         color = 'r';
         switch plot_col
             case 1
@@ -23,8 +29,14 @@ for iter = 0:size(plots, 2)-1
         end
         
         hold on
-        plot(t(1:size(y, 1)), y(:, plot_col), color)
-        %plot(t(1:size(y, 1)), y(:, plot_col), color);
+        
+        plot(t(1:size(y(:, plot_col), 1)), y(:, plot_col), color);
+        largest_range = bsxfun(@max, largest_range, xlim.*axes_flip)
+        
+        if title_idx <= numel(titles)
+            title(titles(title_idx))
+        end
+        title_idx = title_idx + 1;
         
         for vert_set_idx = 1:numel(verticals)
             vert_set = cell2mat(verticals(vert_set_idx));
@@ -40,6 +52,11 @@ for iter = 0:size(plots, 2)-1
             end
         end
     end
+end
+
+for i = 1:numel(handles)
+   axes(handles(i));
+   xlim(largest_range.*axes_flip);
 end
 
 end
