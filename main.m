@@ -14,7 +14,7 @@ types = import_file_types(strcat(data_dir, '/file_types.csv'));
 start_pct = 0.0;
 end_pct = 0.95;
 s = build_data_struct(data_dir, types, start_pct, end_pct);
-s;
+s.data(1).pos.comp
 
 % Convert NS to seconds
 ns2sec = @(ns_val) max((ns_val - s.max_ns_start)./(1000000000.0), 0);
@@ -24,18 +24,11 @@ s = resample_data(s, ns2sec(s.max_ns_start), ns2sec(s.min_ns_end), 0.01);
 
 
 % Select dataset
-dataset = s.ObjManip(1);
+dataset = s.data(1);
 datasets = [];
-for i = 1:numel(s.ObjManip)
-    datasets = [datasets, s.ObjManip(i).vel.mag];
+for i = 1:numel(s.data)
+    datasets = [datasets, s.data(i).vel.mag];
 end
-for i = 1:numel(s.FixManip)
-    datasets = [datasets, s.FixManip(i).vel.mag];
-end
-for i = 1:numel(s.FixObj)
-    datasets = [datasets, s.FixObj(i).vel.mag];
-end
-
 for i = 1:numel(datasets)
     size(datasets(i).Data);
     %data = [data; datasets(i).Data'];
@@ -59,7 +52,7 @@ dots = repmat('-', 1, numel(s.manual.EndTime));
 dots(1) = '.';
 
 clf
-plot_all(plots, {s.manual.EndTime }, dots, {'Hand->Wheel Position', 'Hand->Wheel Velocity'})
+plot_all(plots, {s.manual.EndTime }, dots, {'Hand->Wheel Position', 'Hand->Wheel Velocity'});
 
 
 %%
@@ -105,7 +98,7 @@ totErr = 0;
 for i = 1:length(segTimes)
     totErr = totErr + min(abs(segTimes(i) - s.manual.EndTime));
 end
-avgErr = totErr/length(segTimes);
+avgErr = totErr/length(segTimes)
 
 
 

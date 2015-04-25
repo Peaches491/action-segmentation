@@ -1,11 +1,11 @@
-function [ s ] = build_data_struct( data_dir, types, start_pct, end_pct, resample_range)
+function [ s ] = build_data_struct( data_dir, types, start_pct, end_pct)
 %BUILD_DATA_STRUCT Summary of this function goes here
 %   Detailed explanation goes here
 
 traj = struct('comp', timeseries, 'mag', timeseries);
 traj_pos_vel = struct('pos', struct(traj), ...
-    'vel', struct(traj), ...
-    'acc', struct(traj));
+                      'vel', struct(traj), ...
+                      'acc', struct(traj));
 
 min_t_start = realmax('double');
 max_t_start = 0;
@@ -13,10 +13,7 @@ max_t_start = 0;
 min_t_end = realmax('double');
 max_t_end = 0;
 
-s = struct();
-s.ObjManip = [];
-s.FixManip = [];
-s.FixObj = [];
+s = struct('data', [], 'manual', [], 'states', []);
 
 s.manual = import_manual_segments(strcat(data_dir, 'manual_segment.csv'));
 s.states = import_state_changes(strcat(data_dir, 'states.csv'));
@@ -75,23 +72,21 @@ for i = 1:size(types)
     new_s.acc.mag = timeseries(mag(a), t(1:size(a, 1)));
     new_s.acc.comp.Name = ts_name;
     new_s.acc.mag.Name = ts_name;
-    
-    if  strcmp(types(i, :).FromClass, 'Object') && ...
-        strcmp(types(i, :).ToClass, 'Manipulator')
-        s.ObjManip = [s.ObjManip, new_s];
-    elseif strcmp(types(i, :).FromClass, 'Fixture') && ...
-            strcmp(types(i, :).ToClass, 'Manipulator')
-        s.FixManip = [s.FixManip, new_s];
-    elseif strcmp(types(i, :).FromClass, 'Fixture') && ...
-            strcmp(types(i, :).ToClass, 'Object')
-        s.FixObj = [s.FixObj, new_s];
-    end
+	
+    i
+    new_s.pos.mag
+    s.data = [s.data, new_s];
+%     if  strcmp(types(i, :).FromClass, 'Object') && ...
+%         strcmp(types(i, :).ToClass, 'Manipulator')
+%         s.ObjManip = [s.ObjManip, new_s];
+%     elseif strcmp(types(i, :).FromClass, 'Fixture') && ...
+%             strcmp(types(i, :).ToClass, 'Manipulator')
+%         s.FixManip = [s.FixManip, new_s];
+%     elseif strcmp(types(i, :).FromClass, 'Fixture') && ...
+%             strcmp(types(i, :).ToClass, 'Object')
+%         s.FixObj = [s.FixObj, new_s];
+%     end
 end
-
-ns2sec(min_t_start)
-ns2sec(max_t_start)
-ns2sec(min_t_end)
-ns2sec(max_t_end)
 
 s.min_ns_start = min_t_start;
 s.max_ns_start = max_t_start;
