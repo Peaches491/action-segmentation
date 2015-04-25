@@ -7,7 +7,7 @@ addpath 'vbgm/'
 addpath 'imports/'
 format long
 
-data_dir = 'data/remove_tire/';
+data_dir = 'data/mount_tire/';
 types = import_file_types(strcat(data_dir, '/file_types.csv'));
 
 % Define start and end points
@@ -59,7 +59,7 @@ dots = repmat('-', 1, numel(s.manual.EndTime));
 dots(1) = '.';
 
 clf
-plot_all(plots, { s.manual.EndTime }, dots, {'Hand->Wheel Position', 'Hand->Wheel Velocity'})
+plot_all(plots, {s.manual.EndTime }, dots, {'Hand->Wheel Position', 'Hand->Wheel Velocity'})
 
 
 %%
@@ -75,7 +75,7 @@ data = [data, ds.Time];
 size(data)
 data = data(~any(isnan(data),2),:);
 
-switch 3
+switch 1
     case 1
         c = kmeans(data, 4);
     case 2
@@ -87,6 +87,24 @@ switch 3
         c = cluster(gm, data);
 end
 num_clusters = max(c)
+
+last = 1;
+segTimes = [];
+for i = 2:length(c)
+    if c(i) ~= c(last)
+        segTimes = [segTimes; t(i)];
+    end
+    last = i;
+end
+
+totErr = 0;
+for i = 1:length(segTimes)
+    totErr = totErr + min(abs(segTimes(i) - s.manual.EndTime));
+end
+avgErr = totErr/length(segTimes);
+
+
+
 
 clf;
 % combos = combnk(1:size(data, 2), 3);
@@ -111,7 +129,7 @@ for i = 1:numel(smoothed_datasets)
     dots(1) = '.';
     
     %plot(ds.Time(1:numel(c)), smoothed_datasets(i).Data(1:numel(c)), '-')
-    plot_all(smoothed_datasets(i), { s.manual.EndTime }, dots, {}, false)
+    plot_all(smoothed_datasets(i), {s.states.Time, s.manual.EndTime, segTimes }, dots, {}, false)
     title(smoothed_datasets(i).Name)
 end
 
