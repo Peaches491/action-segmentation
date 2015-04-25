@@ -36,7 +36,7 @@ for i = 1:size(types)
     max_t_end = max(max_t_end, max(t));
 end
 
-ns2sec = @(ns_val) (ns_val - min_t_start)./(1000000000.0);
+ns2sec = @(ns_val) (ns_val - max_t_start)./(1000000000.0);
 
 for i = 1:size(types)
     new_s = struct(traj_pos_vel);
