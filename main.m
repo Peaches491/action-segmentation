@@ -85,6 +85,10 @@ switch 3
     case 4
         gm = fitgmdist(data, 5);
         c = cluster(gm, data);
+    case 5
+        [center,U,objFcn] = fcm(data,5); %5 = number of clusters
+        [m,c] = max(U);
+        c = transpose(c);
 end
 num_clusters = max(c)
 
