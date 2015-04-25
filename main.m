@@ -59,7 +59,7 @@ plot_all(plots, {s.manual.EndTime }, dots, {'Hand->Wheel Position', 'Hand->Wheel
 data = [];
 smoothed_datasets = [];
 for i = 1:numel(datasets)
-    ds = smooth_dataset(datasets(i), 'moving', 15);
+    ds = smooth_dataset(datasets(i), 'lowess');
     data = [data, ds.Data];
     smoothed_datasets = [smoothed_datasets, ds];
 end

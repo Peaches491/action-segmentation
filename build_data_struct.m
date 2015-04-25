@@ -43,38 +43,44 @@ for i = 1:size(types)
     st_idx = int32(size(t,1)*start_pct) + 1;
     end_idx = int32(size(t,1)*end_pct);
     t = t(st_idx:end_idx);
-    x = data(st_idx:end_idx, 2:end);
     
-    dx = x(2:end, :) - x(1:end-1, :);
-    dt = t(2:end) - t(1:end-1);
-    v = bsxfun (@rdivide, dx, dt);
-    
-    ddx = dx(2:end, :) - dx(1:end-1, :);
-    a = bsxfun (@rdivide, ddx, dt(1:end-1));
     
     mag = @(v)(sqrt(v(:, 1).^2 + v(:, 2).^2 + v(:, 3).^2));
+    
+    x_comp = data(st_idx:end_idx, 2:end);
+    x_mag = mag(x_comp);
+    
+    dt = t(2:end) - t(1:end-1);
+    dx_comp = x_comp(2:end, :) - x_comp(1:end-1, :);
+    dx_mag = x_mag(2:end, :) - x_mag(1:end-1, :);
+    v_comp = bsxfun (@rdivide, dx_comp, dt);
+    v_mag = bsxfun (@rdivide, dx_mag, dt);
+    
+    ddx_comp = dx_comp(2:end, :) - dx_comp(1:end-1, :);
+    ddx_mag = dx_comp(2:end, :) - dx_comp(1:end-1, :);
+    a_comp = bsxfun (@rdivide, ddx_comp, dt(1:end-1));
+    a_mag = bsxfun (@rdivide, ddx_mag, dt(1:end-1));
+    
     
     ts_name = strcat(types(i, :).FromClass, ':', types(i, :).FromName, ' -> ', ...
         types(i, :).ToClass, ':', types(i, :).ToName);
     ts_name = strrep(ts_name, '_', '\_');
     
-    new_s.pos.comp = timeseries(x, t);
-    new_s.pos.mag = timeseries(mag(x), t);
+    new_s.pos.comp = timeseries(x_comp, t);
+    new_s.pos.mag = timeseries(x_mag, t);
     new_s.pos.comp.Name = ts_name;
     new_s.pos.mag.Name = ts_name;
     
-    new_s.vel.comp = timeseries(v, t(1:size(v, 1)));
-    new_s.vel.mag = timeseries(mag(v), t(1:size(v, 1)));
+    new_s.vel.comp = timeseries(v_comp, t(1:size(v_comp, 1)));
+    new_s.vel.mag = timeseries(v_mag, t(1:size(v_mag, 1)));
     new_s.vel.comp.Name = ts_name;
     new_s.vel.mag.Name = ts_name;
     
-    new_s.acc.comp = timeseries(a, t(1:size(a, 1)));
-    new_s.acc.mag = timeseries(mag(a), t(1:size(a, 1)));
+    new_s.acc.comp = timeseries(a_comp, t(1:size(a_comp, 1)));
+    new_s.acc.mag = timeseries(a_mag, t(1:size(a_mag, 1)));
     new_s.acc.comp.Name = ts_name;
     new_s.acc.mag.Name = ts_name;
 	
-    i
-    new_s.pos.mag
     s.data = [s.data, new_s];
 %     if  strcmp(types(i, :).FromClass, 'Object') && ...
 %         strcmp(types(i, :).ToClass, 'Manipulator')
