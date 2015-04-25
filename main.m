@@ -106,9 +106,16 @@ for i = 1:numel(smoothed_datasets)
     subplot(rows, round(size(smoothed_datasets, 2)/rows), i);
     hold on;
     scatter(ds.Time(1:numel(c)), smoothed_datasets(i).Data(1:numel(c)), 12, c)
-    plot(ds.Time(1:numel(c)), smoothed_datasets(i).Data(1:numel(c)), '-')
+    
+    dots = repmat('-', 1, numel(s.manual.EndTime));
+    dots(1) = '.';
+    
+    %plot(ds.Time(1:numel(c)), smoothed_datasets(i).Data(1:numel(c)), '-')
+    plot_all(smoothed_datasets(i), { s.manual.EndTime }, dots, {}, false)
     title(smoothed_datasets(i).Name)
 end
+
+
 
 
 

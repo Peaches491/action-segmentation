@@ -1,9 +1,16 @@
-function h = plot_all(plots, verticals, dots, titles)
+function h = plot_all(plots, verticals, dots, titles, varargin)
 
 title_idx = 1;
 largest_range = [realmax, realmax]*-1;
 axes_flip = [-1, 1];
 handles = [];
+
+if nargin > 4
+    do_subplot = varargin{1};
+else 
+    do_subplot = true;
+end
+
 
 for iter = 0:size(plots, 2)-1
     
@@ -16,8 +23,10 @@ for iter = 0:size(plots, 2)-1
         [size(plots, 2), size(y, 2)];
         plot_no = iter*size(y, 2) + plot_col;
         
-        h = subplot(size(plots, 2), size(y, 2), plot_no);
-        handles = [handles, h];
+        if do_subplot
+            h = subplot(size(plots, 2), size(y, 2), plot_no);
+            handles = [handles, h];
+        end
         color = 'r';
         switch plot_col
             case 1
