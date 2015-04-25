@@ -14,20 +14,103 @@ types = import_file_types(strcat(data_dir, '/file_types.csv'));
 start_pct = 0.0;
 end_pct = 0.95;
 s = build_data_struct(data_dir, types, start_pct, end_pct);
-s
+s;
 
 % Convert NS to seconds
-ns2sec = @(ns_val) max((ns_val - s.min_ns)./(1000000000.0), 0);
+ns2sec = @(ns_val) max((ns_val - s.min_ns_start)./(1000000000.0), 0);
+
+% Resample data to fixed interval
+s = resample_data(s, ns2sec(s.max_ns_start), ns2sec(s.min_ns_end), 0.01);
+
+
+% Select dataset
 dataset = s.ObjManip(1);
+datasets = [];
+for i = 1:numel(s.ObjManip)
+    datasets = [datasets, s.ObjManip(i).vel.mag];
+end
+for i = 1:numel(s.FixManip)
+    datasets = [datasets, s.FixManip(i).vel.mag];
+end
+for i = 1:numel(s.FixObj)
+    datasets = [datasets, s.FixObj(i).vel.mag];
+end
+
+for i = 1:numel(datasets)
+    size(datasets(i).Data)
+    %data = [data; datasets(i).Data'];
+end
 
 
-%% Get smoothed data
+%% Plot Data
 clc;
 smooth_cols = @(t, x, varargs) cell2mat(cellfun(@(x)(smooth(t(1:numel(x)), x, varargs(1), 'moving')), num2cell(x, 1), 'UniformOutput', false));
+
 args = [50];
-t = dataset.pos.t;
-x = smooth_cols(dataset.pos.t, dataset.pos.mag, args);
-v = smooth_cols(dataset.vel.t, dataset.vel.mag, args);
+t = dataset.pos.mag.Time;
+x = smooth_cols(t, dataset.pos.mag.Data, args);
+v = smooth_cols(t, dataset.vel.mag.Data, args);
+
+
+plots = [smooth_dataset(dataset.vel.comp, 'moving', 5), ...
+    smooth_dataset(dataset.vel.mag, 'moving', 25), ...
+    smooth_dataset(dataset.vel.mag, 'moving', 50)];
+dots = repmat('-', 1, numel(s.manual.EndTime));
+dots(1) = '.';
+
+clf
+plot_all(plots, { s.manual.EndTime }, dots, {'Hand->Wheel Position', 'Hand->Wheel Velocity'})
+
+
+%%
+data = [];
+smoothed_datasets = [];
+for i = 1:numel(datasets)
+    ds = smooth_dataset(datasets(i), 'moving', 15);
+    data = [data, ds.Data];
+    smoothed_datasets = [smoothed_datasets, ds];
+end
+
+data = [data, ds.Time];
+size(data)
+data = data(~any(isnan(data),2),:);
+
+switch 3
+    case 1
+        c = kmeans(data, 4);
+    case 2
+        c = clusterdata(data, 'cutoff', 1.15);
+    case 3
+        c = vbgm(data', min(25, size(data, 1)));
+    case 4
+        gm = fitgmdist(data, 5);
+        c = cluster(gm, data);
+end
+num_clusters = max(c)
+
+clf;
+% combos = combnk(1:size(data, 2), 3);
+% combos = sort(combos);
+% rows = 3
+% 
+% for i = 1:size(combos, 1)
+%     subplot(rows, round(size(combos, 1)/rows), i)
+%     X = data(:, combos(i, :));
+%     scatter3(X(:,1),X(:,2),X(:,3),10,c)
+%     title(mat2str(combos(i, :)))
+% end
+% 
+% figure();
+rows = 2;
+for i = 1:numel(smoothed_datasets)
+    subplot(rows, round(size(smoothed_datasets, 2)/rows), i);
+    hold on;
+    scatter(ds.Time(1:numel(c)), smoothed_datasets(i).Data(1:numel(c)), 12, c)
+    plot(ds.Time(1:numel(c)), smoothed_datasets(i).Data(1:numel(c)), '-')
+    title(smoothed_datasets(i).Name)
+end
+
+
 
 
 %% Generate points
