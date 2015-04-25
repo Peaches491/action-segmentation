@@ -4,3 +4,4 @@ hub_LF-hand_L.csv, Fixture, Manipulator, hub_LF, hand_L
 hub_LF-hand_R.csv, Fixture, Manipulator, hub_LF, hand_R
 wheel_LF-hand_L.csv, Object, Manipulator, wheel_LF, hand_L
 wheel_LF-hand_R.csv, Object, Manipulator, wheel_LF, hand_R
+hand_L-hand_R.csv, Manipulator, Manipulator, hand_L, hand_R
