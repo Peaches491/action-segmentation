@@ -75,7 +75,7 @@ data = [data, ds.Time];
 size(data)
 data = data(~any(isnan(data),2),:);
 
-switch 4
+switch 5
     case 1
         c = kmeans(data, 4);
     case 2
