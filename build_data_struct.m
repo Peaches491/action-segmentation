@@ -1,14 +1,17 @@
-function [ s ] = build_data_struct( data_dir, types, start_pct, end_pct )
+function [ s ] = build_data_struct( data_dir, types, start_pct, end_pct, resample_range)
 %BUILD_DATA_STRUCT Summary of this function goes here
 %   Detailed explanation goes here
 
-traj = struct('comp', [], 'mag', [], 't', []);
+traj = struct('comp', timeseries, 'mag', timeseries);
 traj_pos_vel = struct('pos', struct(traj), ...
     'vel', struct(traj), ...
     'acc', struct(traj));
 
-min_t = realmax('double');
-max_t = 0;
+min_t_start = realmax('double');
+max_t_start = 0;
+
+min_t_end = realmax('double');
+max_t_end = 0;
 
 s = struct();
 s.ObjManip = [];
@@ -25,11 +28,15 @@ for i = 1:size(types)
     end_idx = int32(size(t,1)*end_pct);
     t = t(st_idx:end_idx);
     
-    min_t = min(min_t, min(t));
-    max_t = max(max_t, max(t));
+    
+    min_t_start = min(min_t_start, min(t));
+    max_t_start = max(max_t_start, min(t));
+    
+    min_t_end = min(min_t_end, max(t));
+    max_t_end = max(max_t_end, max(t));
 end
 
-ns2sec = @(ns_val) (ns_val - min_t)./(1000000000.0);
+ns2sec = @(ns_val) (ns_val - min_t_start)./(1000000000.0);
 
 for i = 1:size(types)
     new_s = struct(traj_pos_vel);
@@ -50,17 +57,24 @@ for i = 1:size(types)
     
     mag = @(v)(sqrt(v(:, 1).^2 + v(:, 2).^2 + v(:, 3).^2));
     
-    new_s.pos.comp = x;
-    new_s.pos.mag = mag(x);
-    new_s.pos.t = t;
+    ts_name = strcat(types(i, :).FromClass, ':', types(i, :).FromName, ' -> ', ...
+        types(i, :).ToClass, ':', types(i, :).ToName);
+    ts_name = strrep(ts_name, '_', '\_');
     
-    new_s.vel.comp = v;
-    new_s.vel.mag = mag(v);
-    new_s.vel.t = t(1:numel(new_s.vel.mag));
+    new_s.pos.comp = timeseries(x, t);
+    new_s.pos.mag = timeseries(mag(x), t);
+    new_s.pos.comp.Name = ts_name;
+    new_s.pos.mag.Name = ts_name;
     
-    new_s.acc.comp = a;
-    new_s.acc.mag = mag(a);
-    new_s.acc.t = t(1:numel(new_s.acc.mag));
+    new_s.vel.comp = timeseries(v, t(1:size(v, 1)));
+    new_s.vel.mag = timeseries(mag(v), t(1:size(v, 1)));
+    new_s.vel.comp.Name = ts_name;
+    new_s.vel.mag.Name = ts_name;
+    
+    new_s.acc.comp = timeseries(a, t(1:size(a, 1)));
+    new_s.acc.mag = timeseries(mag(a), t(1:size(a, 1)));
+    new_s.acc.comp.Name = ts_name;
+    new_s.acc.mag.Name = ts_name;
     
     if  strcmp(types(i, :).FromClass, 'Object') && ...
         strcmp(types(i, :).ToClass, 'Manipulator')
@@ -74,27 +88,16 @@ for i = 1:size(types)
     end
 end
 
+ns2sec(min_t_start)
+ns2sec(max_t_start)
+ns2sec(min_t_end)
+ns2sec(max_t_end)
 
-% for i = 1:size(s.FixManip)
-%     s.FixManip(i).pos.t = ns2sec(s.FixManip(i).pos.t);
-%     s.FixManip(i).vel.t = ns2sec(s.FixManip(i).vel.t);
-%     s.FixManip(i).acc.t = ns2sec(s.FixManip(i).acc.t);
-% end
-% 
-% for i = 1:size(s.FixObj)
-%     s.FixObj(i).pos.t = ns2sec(s.FixObj(i).pos.t);
-%     s.FixObj(i).vel.t = ns2sec(s.FixObj(i).vel.t);
-%     s.FixObj(i).acc.t = ns2sec(s.FixObj(i).acc.t);
-% end
-% 
-% for i = 1:size(s.ObjManip)
-%     s.ObjManip(i).pos.t = ns2sec(s.ObjManip(i).pos.t);
-%     s.ObjManip(i).vel.t = ns2sec(s.ObjManip(i).vel.t);
-%     s.ObjManip(i).acc.t = ns2sec(s.ObjManip(i).acc.t);
-% end
+s.min_ns_start = min_t_start;
+s.max_ns_start = max_t_start;
 
-s.min_ns = min_t;
-s.max_ns = max_t;
+s.min_ns_end = min_t_end;
+s.max_ns_end = max_t_end;
 
 % Replace all zero t withj beginning of file
 s.manual.StartTime(s.manual.StartTime==0) = data(st_idx, 1);

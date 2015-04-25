@@ -7,9 +7,9 @@ handles = [];
 
 for iter = 0:size(plots, 2)-1
     
-    y = cell2mat(plots(:, iter+1));
-    t = y(:, 1);
-    y = y(:, 2:end);
+    ds = plots(iter+1);
+    t = ds.Time;
+    y = ds.Data;
     
     for plot_col = 1:size(y, 2)
         
@@ -31,10 +31,12 @@ for iter = 0:size(plots, 2)-1
         hold on
         
         plot(t(1:size(y(:, plot_col), 1)), y(:, plot_col), color);
-        largest_range = bsxfun(@max, largest_range, xlim.*axes_flip)
+        largest_range = bsxfun(@max, largest_range, xlim.*axes_flip);
         
         if title_idx <= numel(titles)
             title(titles(title_idx))
+        else
+            title(ds.Name)
         end
         title_idx = title_idx + 1;
         
