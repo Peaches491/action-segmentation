@@ -68,7 +68,7 @@ for mode = 1:num_modes
         for i = 1:length(segTimes)
             totErr = totErr + min(abs(segTimes(i) - s.manual.EndTime));
         end
-        avgErr = totErr/length(segTimes);
+        avgErr = totErr/length(segTimes)
         errs(mode, iter-1) = avgErr;
         clf
         bar(errs(:, :)')
@@ -86,12 +86,20 @@ for i = 1:numel(smoothed_datasets)
     
     dots = repmat('-', 1, numel(s.manual.EndTime));
     dots(1) = '.';
+    dots(2) = '.';
     
     %plot(ds.Time(1:numel(c)), smoothed_datasets(i).Data(1:numel(c)), '-')
-    plot_all(smoothed_datasets(i), {s.states.Time, s.manual.EndTime, segTimes }, dots, {}, false)
+    plot_all(smoothed_datasets(i), {s.states.Time, s.group.average, segTimes }, dots, {}, false)
     title(smoothed_datasets(i).Name)
 end
-% 
+
+num_cuts = numel(segTimes);
+
+totErr = 0;
+for i = 1:length(segTimes)
+    totErr = totErr + min(abs(segTimes(i) - s.manual.EndTime));
+end
+avgErr = totErr/length(segTimes)
 
 
 

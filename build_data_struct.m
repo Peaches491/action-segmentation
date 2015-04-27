@@ -17,6 +17,7 @@ s = struct('data', [], 'manual', [], 'states', []);
 
 s.manual = import_manual_segments(strcat(data_dir, 'manual_segment.csv'));
 s.states = import_state_changes(strcat(data_dir, 'states.csv'));
+s.group = import_group_segments(strcat(data_dir, 'group_segment.csv'));
 
 for i = 1:size(types)
     data = csvread(strcat(data_dir, cell2mat(types(i, :).FileName)), 1, 0);
@@ -103,15 +104,31 @@ s.max_ns_end = max_t_end;
 % Replace all zero t withj beginning of file
 s.manual.StartTime(s.manual.StartTime==0) = data(st_idx, 1);
 s.states.Time(s.states.Time==0) = data(st_idx, 1);
+for col = 1:3
+    for row = 1:size(s.group, 1)
+        if s.group{row, col} == 0
+            s.group{row, col} = data(st_idx, 1);
+        end
+        if s.group{row, col} < 0
+            s.group{row, col} = data(end_idx, 1);
+        end
+        s.group{row, col} = ns2sec(s.group{row, col});
+    end
+end
+
 
 % Replace all negative t with the end of the file
 s.manual.EndTime(s.manual.EndTime<0) = data(end_idx, 1);
 s.states.Time(s.states.Time<0) = data(end_idx, 1);
 
+
 % Convert times for manual segmentations and state transitions
 s.manual.StartTime = ns2sec(s.manual.StartTime);
 s.manual.EndTime = ns2sec(s.manual.EndTime);
 s.states.Time = ns2sec(s.states.Time);
+
+s.group.average = sum(s.group{:, 1:3}, 2)/3.0;
+s.group.std_dev = std(s.group{:, 1:3}, 0, 2);
 
 end
 
