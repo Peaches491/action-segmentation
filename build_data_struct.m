@@ -121,7 +121,6 @@ end
 s.manual.EndTime(s.manual.EndTime<0) = data(end_idx, 1);
 s.states.Time(s.states.Time<0) = data(end_idx, 1);
 
-
 % Convert times for manual segmentations and state transitions
 s.manual.StartTime = ns2sec(s.manual.StartTime);
 s.manual.EndTime = ns2sec(s.manual.EndTime);

@@ -1,4 +1,4 @@
-clc; clear all;
+clc;
 addpath 'data/'
 addpath 'data/mount_tire/'
 addpath 'data/remove_tire/'
@@ -28,7 +28,7 @@ s = resample_data(s, ns2sec(s.max_ns_start), ns2sec(s.min_ns_end), 0.01);
 dataset = s.data(1);
 datasets = [];
 for i = 1:numel(s.data)
-    %datasets = [datasets, s.data(i).pos.mag];
+    datasets = [datasets, s.data(i).pos.mag];
     datasets = [datasets, s.data(i).vel.mag];
 end
 for i = 1:numel(datasets)
@@ -77,7 +77,19 @@ end
 clf
 bar(errs')
 
+
 %%
+[c, segTimes] = cluster_data(data, t, 3, 4);
+
+num_cuts = numel(segTimes);
+
+totErr = 0;
+for i = 1:length(segTimes)
+    totErr = totErr + min(abs(segTimes(i) - s.manual.EndTime));
+end
+avgErr = totErr/length(segTimes)
+
+clf;
 rows = 3;
 for i = 1:numel(smoothed_datasets)
     subplot(rows, round(size(smoothed_datasets, 2)/rows), i);
@@ -86,10 +98,9 @@ for i = 1:numel(smoothed_datasets)
     
     dots = repmat('-', 1, numel(s.manual.EndTime));
     dots(1) = '.';
-    dots(2) = '.';
     
     %plot(ds.Time(1:numel(c)), smoothed_datasets(i).Data(1:numel(c)), '-')
-    plot_all(smoothed_datasets(i), {s.states.Time, s.group.average, segTimes }, dots, {}, false)
+    plot_all(smoothed_datasets(i), {s.group.average, segTimes }, dots, {}, false)
     title(smoothed_datasets(i).Name)
 end
 
