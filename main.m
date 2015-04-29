@@ -30,14 +30,10 @@ datasets = [];
 for i = 1:numel(s.data)
     datasets = [datasets, s.data(i).pos.mag];
     datasets = [datasets, s.data(i).vel.mag];
+    %datasets = [datasets, s.data(i).acc.mag];
 end
-for i = 1:numel(datasets)
-    size(datasets(i).Data);
-    %data = [data; datasets(i).Data'];
-end
+filename = 'remove_test_pos_vel_t.csv'
 
-
-%%
 data = [];
 smoothed_datasets = [];
 for i = 1:numel(datasets)
@@ -47,39 +43,89 @@ for i = 1:numel(datasets)
 end
 
 data = [data, ds.Time];
-size(data)
+
 data = data(~any(isnan(data),2),:);
 t = dataset.pos.mag.Time;
 
-max_k = 8;
+max_k = 10;
+num_reps = 20;
 num_modes = 5;
-errs = zeros(num_modes, max_k-1);
+%errs = [];
+errs = struct('Mode', [], 'Param', [], 'Iter', [], 'Avg_Dist', [], 'Num_Cuts_Err', []);
+errs_idx = 1;
 for mode = 1:num_modes
+    mode_str = '';
+    switch mode
+        case 1
+            mode_str = 'kmeans';
+        case 2
+            mode_str = 'clusterdata';
+        case 3
+            mode_str = 'vbgm';
+        case 4
+            mode_str = 'gm';
+        case 5
+            mode_str = 'fuzzy_kmeans';
+    end
     for iter = 2:max_k
-        if mode ~= 2
-            [c, segTimes] = cluster_data(data, t, mode, iter);
-        else 
-            [c, segTimes] = cluster_data(data, t, mode, (iter+max_k*mode)/(2*num_modes*max_k));
-        end
+        for rep = 1:num_reps
+            if mode ~= 2
+                param = iter;
+            else 
+                param = iter;
+                %param = (iter+max_k*mode)/(2*num_modes*max_k);
+            end
+            try
+                [c, segTimes] = cluster_data(data, t, mode, param);
+            catch 
+                rep = rep-1;
+                continue
+            end
+            num_cuts = numel(segTimes);
 
-        num_cuts = numel(segTimes);
-
-        totErr = 0;
-        for i = 1:length(segTimes)
-            totErr = totErr + min(abs(segTimes(i) - s.manual.EndTime));
+            totErr = 0;
+            for i = 1:length(segTimes)
+                totErr = totErr + min(abs(segTimes(i) - s.manual.EndTime));
+            end
+            avgErr = totErr/length(segTimes);
+            errs(errs_idx) = struct('Mode', mode_str, ...
+                                    'Param', param, ...
+                                    'Iter', rep, ...
+                                    'Avg_Dist', avgErr, ...
+                                    'Num_Cuts_Err', num_cuts - size(s.manual.EndTime, 1));
+            errs(errs_idx)
+            errs_idx = errs_idx + 1;
         end
-        avgErr = totErr/length(segTimes)
-        errs(mode, iter-1) = avgErr;
-        clf
-        bar(errs(:, :)')
     end
 end
-clf
-bar(errs')
+
+struct2csv(errs, filename)
+
+%%
+clf;
+
+%x = 1:size(errs, 1);
+%plotyy(x,errs(:, 1),x,errs(:, 2:3),'bar')
+%bar(errs(:, 1))
+
+T2 = struct2table(errs');
+T2.Properties.VariableNames = {'Mode', 'Param', 'Iter', 'Avg_Dist' 'Num_Cuts_Err'}
+T2
+
+%%
+tree = linkage(data,'average');
+dendrogram(tree, 0,'Reorder',1:size(errs, 1))
 
 
 %%
-[c, segTimes] = cluster_data(data, t, 3, 4);
+clc
+T3 = table('VariableNames', {'Avg_Dist' 'Num_Cuts_Err'}')
+T3 = [T3; cell2table({0, 0}, 'VariableNames', T3.Properties.RowNames)]
+
+
+
+%%
+[c, segTimes] = cluster_data(data, t, 3, 6);
 
 num_cuts = numel(segTimes);
 

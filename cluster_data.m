@@ -4,7 +4,7 @@ switch mode
     case 1
         c = kmeans(data, varargin{1});
     case 2
-        c = clusterdata(data, 'cutoff', varargin{1});
+        c = clusterdata(data, 'maxclust', varargin{1});
     case 3
         c = vbgm(data', varargin{1});
     case 4
